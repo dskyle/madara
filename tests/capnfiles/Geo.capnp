@@ -52,6 +52,12 @@ enum Test {
   c @2;
 }
 
+struct Image {
+ rows @0 :UInt32;
+ cols @1 :UInt32;
+ data @2 :Data;
+}
+
 struct StampedPoseList {
   list @0 :List(StampedPose);
   data @1 :List(Int32);
@@ -60,4 +66,5 @@ struct StampedPoseList {
   strs @4 :List(Text);
   en @5 :Test = c;
   i16 @6 :Int16;
+  img @7 :Image;
 }

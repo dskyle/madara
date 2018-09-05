@@ -1499,6 +1499,8 @@ project (Test_Any) : using_madara, no_karl, no_xml, null_lock, using_simtime {
   
   exeout = $(MADARA_ROOT)/bin
   exename = test_any
+
+  libs += opencv_core
   
   Documentation_Files {
   }
