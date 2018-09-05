@@ -55,7 +55,8 @@ enum Test {
 struct Image {
  rows @0 :UInt32;
  cols @1 :UInt32;
- data @2 :Data;
+ type @2 :UInt32;
+ data @3 :Data;
 }
 
 struct StampedPoseList {

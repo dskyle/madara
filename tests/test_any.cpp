@@ -302,24 +302,33 @@ namespace cv {
 auto infer_capn_type(type<cv::UMat>) -> geo_capn::Image;
 
 inline void capn_set(geo_capn::Image::Builder &builder,
-    const cv::UMat &val)
+    const UMat &val)
 {
-  (void)builder;
-  (void)val;
+  builder.setRows(val.rows);
+  builder.setCols(val.cols);
+  builder.setType(val.type());
+
+  size_t size = val.u->size;
+  auto data = builder.initData(size);
+  memcpy(data.begin(), val.u->data, size);
 }
 
 inline void capn_get(geo_capn::Image::Reader &reader,
-    cv::UMat &val)
+    UMat &val)
 {
-  (void)reader;
-  (void)val;
+  auto data = reader.getData();
+  int type = reader.getType();
+  int rows = reader.getRows();
+  int cols = reader.getCols();
+  Mat(rows, cols, type, (void*)data.begin()).copyTo(val);
 }
 
 template<typename Archive>
-void serialize(Archive &ar, cv::UMat &mat)
+void serialize(Archive &ar, UMat &mat)
 {
   ar(cereal::make_nvp("rows", mat.rows));
   ar(cereal::make_nvp("cols", mat.cols));
+  ar(cereal::make_nvp("type", mat.type()));
 }
 
 }
@@ -619,7 +628,7 @@ void test_geo()
     {0, "frame0", 1, 2},
     {1, "frame1", 2, 3},
     {2, "frame2", 3, 4},
-  }, {2, 4, 6}, {{3, 6, 9}}, 42, {"foo", "bar"}, 2, TestEnum::b, {3, 3, 0}};
+  }, {2, 4, 6}, {{3, 6, 9}}, 42, {"foo", "bar"}, 2, TestEnum::b, {3, 3, CV_8UC3}};
   kb.set_any("vs0", std::move(vs0));
 
   VAL(kb.get("vs0").to_any());
@@ -642,6 +651,8 @@ void test_geo()
   auto avs0_reader = avs0ref.reader();
   auto avs0i = avs0_reader.get("i");
   TEST_EQ(avs0i.template as<int>(), 42);
+  auto avs0img = avs0_reader.get("img").as<capnp::DynamicStruct>();
+  TEST_EQ(avs0img.get("rows").template as<int>(), 3);
 
   auto avs0_sreader = avs0.template reader<geo_capn::StampedPoseList>();
   TEST_EQ(avs0_sreader.getI(), 42);
