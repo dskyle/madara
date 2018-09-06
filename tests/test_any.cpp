@@ -489,6 +489,7 @@ namespace geo
     Any::register_type<Pose>("Pose");
     Any::register_type<Stamp>("Stamp");
     Any::register_type<StampedPose>("StampedPose");
+    Any::register_type<cv::UMat>("Image");
 
     Any::register_schema("Point",
         capnp::Schema::from<geo_capn::Point>());
@@ -656,6 +657,9 @@ void test_geo()
 
   auto avs0_sreader = avs0.template reader<geo_capn::StampedPoseList>();
   TEST_EQ(avs0_sreader.getI(), 42);
+
+  Any aimg(type<cv::UMat>(), 4, 4, CV_8UC3);
+  TEST_EQ(aimg.cref<cv::UMat>().cols, 4);
 
   auto avs0data = avs0_reader.get("data");
   auto avs0data_reader = avs0data.template as<capnp::List<int>>();
